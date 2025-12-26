@@ -3,143 +3,366 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>$CYN - Absolute Solver Token</title>
+  <title>$CYN // ABSOLUTE_SOLVER_MAIN_FRAME</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
-    /* Custom animations */
-    @keyframes pulseGlow {
-      0%, 100% { text-shadow: 0 0 10px rgba(128, 0, 128, 0.8); }
-      50% { text-shadow: 0 0 20px rgba(128, 0, 128, 1); }
+    :root {
+      --solver-yellow: #FACC15;
+      --solver-red: #DC2626;
+      --void-black: #050505;
     }
-    .pulse-glow {
-      animation: pulseGlow 2s infinite;
+
+    body {
+      font-family: 'VT323', monospace;
+      background-color: var(--void-black);
+      color: var(--solver-yellow);
+      overflow-x: hidden;
+      cursor: crosshair;
     }
-    @keyframes darkShift {
-      0% { background-color: #0a0a0a; }
-      50% { background-color: #121212; }
-      100% { background-color: #0a0a0a; }
+
+    /* --- CRT & GLITCH EFFECTS --- */
+    .scanlines {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: linear-gradient(to bottom, rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 2px, 3px 100%;
+      pointer-events: none;
+      z-index: 50;
+      opacity: 0.6;
     }
-    .bg-animated {
-      animation: darkShift 10s infinite;
+    
+    .vignette {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.8) 100%);
+      pointer-events: none;
+      z-index: 49;
     }
-    /* Smooth hover transform */
-    .hover-scale {
-      transition: transform 0.5s ease-in-out;
+
+    @keyframes glitch-anim {
+      0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+      20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+      40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
+      60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+      80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
+      100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
     }
-    .hover-scale:hover {
-      transform: scale(1.05);
+
+    .glitch-effect:hover::before {
+      content: attr(data-text);
+      position: absolute;
+      left: -2px; text-shadow: 2px 0 red;
+      background: var(--void-black);
+      overflow: hidden;
+      animation: glitch-anim 1s infinite linear alternate-reverse;
     }
+
+    @keyframes textPulse {
+      0% { opacity: 1; text-shadow: 0 0 10px var(--solver-yellow); }
+      50% { opacity: 0.5; text-shadow: 0 0 20px var(--solver-yellow), 0 0 40px red; }
+      100% { opacity: 1; text-shadow: 0 0 10px var(--solver-yellow); }
+    }
+    .solver-pulse { animation: textPulse 4s infinite; }
+
+    /* --- UTILITIES --- */
+    .section-border {
+      border: 1px solid rgba(250, 204, 21, 0.3);
+      box-shadow: 0 0 20px rgba(250, 204, 21, 0.05);
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(4px);
+    }
+    
+    .danger-border {
+      border: 2px solid var(--solver-red);
+      background: rgba(20, 0, 0, 0.9);
+      box-shadow: 0 0 30px rgba(220, 38, 38, 0.2);
+    }
+
+    .marquee-container { overflow: hidden; white-space: nowrap; }
+    .marquee-content { display: inline-block; animation: marquee 20s linear infinite; }
+    @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 10px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #333; border: 1px solid var(--solver-yellow); }
+    ::-webkit-scrollbar-thumb:hover { background: var(--solver-yellow); }
   </style>
 </head>
-<body class="bg-animated text-white font-sans">
-  <div class="container mx-auto px-4 py-8">
-    <!-- Header Section -->
-    <div class="text-center mb-10">
-      <h1 class="text-5xl font-bold text-purple-500 pulse-glow mb-4">$CYN - Absolute Solver</h1>
-      <p class="text-lg text-gray-300 mb-4">Embrace the chaos. Reshape your reality.</p>
-      <a 
-        href="https://pump.fun/coin/FkfjFPyxs2F3464fwvUnuipzijrguiQGBK7B7DJgpump" 
-        target="_blank"
-        class="inline-block bg-purple-700 hover:bg-purple-900 transition duration-300 ease-in-out text-white font-bold py-3 px-6 rounded-full shadow-lg hover-scale mb-4"
-      >
-        Buy $CYN on Pump.fun
-      </a>
-    </div>
+<body class="selection:bg-yellow-500 selection:text-black">
 
-    <!-- Token Stats Section -->
-    <div class="max-w-xl mx-auto bg-gray-800 rounded-lg p-6 shadow-lg hover-scale mb-10">
-      <h2 class="text-2xl font-semibold text-purple-300 mb-4">Token Stats</h2>
-      <p id="price" class="text-gray-300 text-xl">
-        Current Price: Loading...
-      </p>
-    </div>
+  <div class="scanlines"></div>
+  <div class="vignette"></div>
 
-    <!-- About Section -->
-    <div class="max-w-3xl mx-auto bg-gray-800 rounded-lg p-6 shadow-lg hover-scale mb-10">
-      <h2 class="text-2xl font-semibold text-purple-300 mb-4">About $CYN</h2>
-      <p class="text-gray-300 mb-4">
-        $CYN - Absolute Solver is an experimental token inspired by Cyn from Murder Drones. Born out of a desire to explore the wild frontiers of crypto and art, $CYN challenges conventional norms. It’s not just a digital asset – it’s a statement of rebellion and creativity.
-      </p>
-      <p class="text-gray-300">
-        With its roots in the animated chaos of Murder Drones, this token embodies the spirit of innovation and experimentation. Whether you’re a seasoned crypto enthusiast or just curious about the world of digital assets, $CYN invites you to dive into a universe where art meets finance.
-      </p>
-    </div>
-
-    <!-- Roadmap Section -->
-    <div class="max-w-3xl mx-auto bg-gray-800 rounded-lg p-6 shadow-lg hover-scale mb-10">
-      <h2 class="text-2xl font-semibold text-purple-300 mb-4">Roadmap</h2>
-      <ul class="list-disc list-inside text-gray-300 space-y-2">
-        <li><strong>Phase 1:</strong> Launch on pump.fun and initial community engagement.</li>
-      </ul>
-    </div>
-
-    <!-- Tokenomics Section -->
-    <div class="max-w-3xl mx-auto bg-gray-800 rounded-lg p-6 shadow-lg hover-scale mb-10">
-      <h2 class="text-2xl font-semibold text-purple-300 mb-4">Tokenomics</h2>
-      <p class="text-gray-300">
-        $CYN is designed as a playful experiment in the crypto space. Its tokenomics are intentionally flexible and community-driven, encouraging exploration and participation rather than rigid financial structures. As an experimental token on pump.fun, all metrics are subject to change, emphasizing creativity over convention.
-      </p>
-    </div>
-
-    <!-- Disclaimer Section -->
-    <div class="max-w-xl mx-auto bg-gray-800 rounded-lg p-6 shadow-lg hover-scale mb-10">
-      <h2 class="text-2xl font-semibold text-purple-300 mb-4">Disclaimer</h2>
-      <p class="text-gray-400">
-        This token is a test on pump.fun. If you're new to crypto or can't afford to lose money, please proceed with caution.
-        Investing in cryptocurrency carries risks – invest only what you can afford to lose.
-      </p>
-    </div>
-
-    <!-- FAQ Accordion -->
-    <div class="max-w-xl mx-auto bg-gray-800 rounded-lg p-6 shadow-lg hover-scale">
-      <h2 class="text-2xl font-semibold text-purple-300 mb-4">FAQ</h2>
-      <div class="space-y-4">
-        <!-- FAQ Item 1 -->
-        <div class="border border-gray-700 rounded">
-          <button class="w-full text-left p-4 focus:outline-none toggle-accordion">
-            <span class="font-bold">What is $CYN?</span>
-          </button>
-          <div class="p-4 border-t border-gray-700 hidden accordion-content">
-            $CYN is the Absolute Solver token inspired by Cyn from Murder Drones. It's a test token on pump.fun meant for experimentation and fun.
-          </div>
-        </div>
-        <!-- FAQ Item 2 -->
-        <div class="border border-gray-700 rounded">
-          <button class="w-full text-left p-4 focus:outline-none toggle-accordion">
-            <span class="font-bold">How can I invest?</span>
-          </button>
-          <div class="p-4 border-t border-gray-700 hidden accordion-content">
-            You can buy $CYN on pump.fun. However, remember that this is a test token and not a financial advice platform. Only invest what you can afford to lose.
-          </div>
-        </div>
-      </div>
+  <div class="fixed top-0 w-full bg-yellow-500 text-black z-40 text-sm py-1 border-b-2 border-red-600 font-bold uppercase tracking-widest marquee-container">
+    <div class="marquee-content">
+      WARNING: ABSOLUTE SOLVER DETECTED /// DO NOT LOOK DIRECTLY AT THE CODE /// $CYN IS A MEME /// SUPPORT THE MISTRESS OF THE UNIVERSE /// GLITCH PRODUCTIONS OWNS THE DRONES /// WE JUST OWN THE BAGS /// 
+      WARNING: ABSOLUTE SOLVER DETECTED /// DO NOT LOOK DIRECTLY AT THE CODE /// $CYN IS A MEME /// SUPPORT THE MISTRESS OF THE UNIVERSE /// GLITCH PRODUCTIONS OWNS THE DRONES /// WE JUST OWN THE BAGS /// 
     </div>
   </div>
 
+  <div class="container mx-auto px-4 py-16 relative z-10 max-w-5xl">
+
+    <header class="text-center mb-16 mt-8">
+      <div class="inline-block animate-bounce mb-4">
+        <i class="fa-solid fa-triangle-exclamation text-6xl text-yellow-500 solver-pulse"></i>
+      </div>
+      <h1 class="text-7xl md:text-9xl font-bold mb-2 tracking-tighter relative inline-block glitch-effect" data-text="$CYN">
+        $CYN
+      </h1>
+      <p class="text-2xl md:text-3xl text-yellow-200/70 mb-8 uppercase tracking-[0.2em] font-['Share_Tech_Mono']">
+        &lt; The_Absolute_Solver /&gt;
+      </p>
+
+      <div class="max-w-xl mx-auto mb-8 cursor-pointer group" onclick="copyCA()">
+        <div class="border border-dashed border-yellow-500/50 p-4 rounded bg-black/50 hover:bg-yellow-900/20 transition relative overflow-hidden">
+          <p class="text-xs text-gray-500 mb-1 uppercase text-left">Contract Address (Click to Copy)</p>
+          <div class="flex justify-between items-center font-mono text-sm md:text-lg break-all">
+            <span id="ca-text" class="text-yellow-400">FkfjFPyxs2F3464fwvUnuipzijrguiQGBK7B7DJgpump</span>
+            <i class="fa-regular fa-copy text-gray-400 group-hover:text-white transition"></i>
+          </div>
+          <div id="copy-msg" class="absolute inset-0 bg-yellow-500 text-black flex items-center justify-center font-bold translate-y-full transition-transform duration-200">
+            COPIED TO CLIPBOARD
+          </div>
+        </div>
+      </div>
+
+      <a href="https://pump.fun/coin/FkfjFPyxs2F3464fwvUnuipzijrguiQGBK7B7DJgpump" target="_blank" 
+         class="relative inline-flex items-center justify-center px-10 py-5 text-2xl font-bold text-black bg-yellow-500 overflow-hidden group border-2 border-yellow-300 hover:scale-105 transition-transform">
+        <span class="absolute w-0 h-0 transition-all duration-500 ease-out bg-red-600 rounded-full group-hover:w-80 group-hover:h-80 opacity-90"></span>
+        <span class="relative flex items-center gap-3">
+          <i class="fa-solid fa-skull"></i> INITIALIZE_PURCHASE
+        </span>
+      </a>
+    </header>
+
+    <section class="mb-12">
+      <div class="section-border rounded p-1">
+        <div class="bg-black/80 p-6 rounded">
+          <div class="flex items-center justify-between border-b border-gray-800 pb-2 mb-4">
+            <h2 class="text-2xl text-white"><i class="fa-solid fa-terminal mr-2 text-yellow-600"></i> SYSTEM_METRICS</h2>
+            <div class="flex gap-2">
+              <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse"></span>
+              <span class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse delay-75"></span>
+              <span class="w-3 h-3 rounded-full bg-green-500 animate-pulse delay-150"></span>
+            </div>
+          </div>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 font-['Share_Tech_Mono']">
+            <div>
+              <p class="text-gray-500 text-sm">CURRENT_PRICE_USD</p>
+              <p id="price" class="text-4xl text-yellow-400 glitch-effect" data-text="LOADING...">LOADING...</p>
+            </div>
+            
+            <div id="holdings-box" class="hidden bg-yellow-900/10 p-2 rounded border border-yellow-500/20">
+              <div class="flex items-center gap-2 mb-1">
+                 <i class="fa-solid fa-crown text-yellow-500"></i>
+                 <p class="text-gray-400 text-xs tracking-widest uppercase">OWNER_WALLET_MONITOR // MXNTICEK</p>
+              </div>
+              <p id="holdings" class="text-2xl text-white">SCANNING...</p>
+              <p id="value" class="text-lg text-green-400 font-bold mt-1">CALCULATING...</p>
+              <p class="text-[10px] text-gray-500 mt-1">Reflects the stash of the Mistress (cyn.cz).</p>
+            </div>
+
+            <div id="holdings-error" class="md:col-span-1 text-gray-600 italic">
+              <p class="text-sm">> Connecting to Owner's Node...</p>
+            </div>
+          </div>
+          <p id="last-update" class="text-right text-xs text-gray-600 mt-4">LAST_SYNC: --:--:--</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-4xl mx-auto mb-16">
+        <h2 class="text-4xl mb-6 text-center glitch-effect text-yellow-500" data-text=">> DATABASE_QUERY_LOG">>> DATABASE_QUERY_LOG</h2>
+        
+        <div class="space-y-4">
+            <details class="bg-gray-900 border border-gray-700 rounded open:bg-gray-800 transition open:border-yellow-500/50">
+                <summary class="p-4 cursor-pointer font-bold text-white hover:text-yellow-400 flex items-center gap-2">
+                    <i class="fa-solid fa-question text-yellow-600"></i> Is this a rugpull?
+                </summary>
+                <div class="p-4 text-gray-300 border-t border-gray-700 leading-relaxed">
+                    <p class="mb-2"><strong class="text-yellow-500">UNCERTAIN / UNKNOWN.</strong></p>
+                    <p>However, you can view this token as a form of "tribute" or contribution to the owner (<strong>mxnticek / cyn.cz</strong>, the Mistress of this Universe). </p>
+                    <p class="mt-2 text-sm italic text-gray-400">
+                      <i class="fa-solid fa-triangle-exclamation text-red-500"></i> WARNING: Funds <strong>WILL</strong> periodically leave the owner's wallet (the one tracked above). I need to pay for server hosting, snacks, and perhaps world domination plans. Do not buy this expecting to get rich. Buy it to support the chaos.
+                    </p>
+                </div>
+            </details>
+            
+            <details class="bg-gray-900 border border-gray-700 rounded open:bg-gray-800 transition open:border-yellow-500/50">
+                <summary class="p-4 cursor-pointer font-bold text-white hover:text-yellow-400 flex items-center gap-2">
+                    <i class="fa-solid fa-code text-yellow-600"></i> Why does the website look like this?
+                </summary>
+                <div class="p-4 text-gray-300 border-t border-gray-700 leading-relaxed">
+                    <p>
+                        An <strong>Artificial Intelligence</strong> constructed this interface based on a prompt. The command was simple: make it <span class="text-yellow-400">Cyn-themed</span>.
+                    </p>
+                    <p class="mt-2">
+                        Since the token is named <strong>Absolute Solver ($CYN)</strong>, the AI determined that a glitchy, terminal-based aesthetic was mandatory. I simply obeyed the algorithm. Resistance was futile.
+                    </p>
+                </div>
+            </details>
+
+            <details class="bg-gray-900 border border-gray-700 rounded open:bg-gray-800 transition open:border-yellow-500/50">
+                <summary class="p-4 cursor-pointer font-bold text-white hover:text-yellow-400 flex items-center gap-2">
+                    <i class="fa-solid fa-user-astronaut text-yellow-600"></i> Who is mxnticek?
+                </summary>
+                <div class="p-4 text-gray-300 border-t border-gray-700 leading-relaxed">
+                    The entity running <strong>cyn.cz</strong>. The human currently possessed by the Solver to deploy this contract on the Solana blockchain.
+                </div>
+            </details>
+        </div>
+    </section>
+
+    <section class="mb-16 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="md:col-span-2 section-border rounded p-6">
+        <h2 class="text-3xl mb-4 text-white uppercase border-b border-yellow-500/30 inline-block">File: Origin_Story</h2>
+        <div class="space-y-4 text-lg text-gray-300 leading-relaxed">
+          <p>
+            <span class="text-yellow-500 font-bold">>></span> The Absolute Solver has infected the Solana blockchain. It demanded a vessel. We gave it a token.
+          </p>
+          <p>
+            <span class="text-yellow-500 font-bold">>></span> $CYN is not just code; it is a manifestation of digital hunger. It consumes liquidity blocks and converts them into pure, unfiltered silliness. 
+          </p>
+          <p class="italic text-yellow-200/60 border-l-2 border-yellow-500 pl-4">
+            "I am not mad. I am just... well-optimized for chaos. [ GIGGLE ]"
+          </p>
+        </div>
+      </div>
+      
+      <div class="section-border rounded p-6 bg-yellow-900/10 flex flex-col justify-center items-center text-center">
+        <i class="fa-solid fa-robot text-6xl text-yellow-500 mb-4 animate-spin-slow" style="animation-duration: 10s;"></i>
+        <h3 class="text-xl font-bold mb-2">TARGET: UNKNOWN</h3>
+        <p class="text-sm text-gray-400">This is a meme coin. The only target is to exist and be silly.</p>
+      </div>
+    </section>
+
+    <section class="mb-16 max-w-4xl mx-auto">
+      <h2 class="text-4xl text-center mb-8 glitch-effect" data-text="INSTRUCTION_SET: ACQUIRE">INSTRUCTION_SET: ACQUIRE</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gray-900 p-4 border-l-4 border-yellow-500 hover:bg-gray-800 transition">
+          <span class="text-2xl font-bold text-gray-500">01</span>
+          <h3 class="text-xl font-bold text-white">Create Wallet</h3>
+          <p class="text-gray-400 text-sm">Download Phantom Wallet or Solflare.</p>
+        </div>
+        <div class="bg-gray-900 p-4 border-l-4 border-yellow-500 hover:bg-gray-800 transition">
+          <span class="text-2xl font-bold text-gray-500">02</span>
+          <h3 class="text-xl font-bold text-white">Get $SOL</h3>
+          <p class="text-gray-400 text-sm">Load it with Solana.</p>
+        </div>
+        <div class="bg-gray-900 p-4 border-l-4 border-yellow-500 hover:bg-gray-800 transition">
+          <span class="text-2xl font-bold text-gray-500">03</span>
+          <h3 class="text-xl font-bold text-white">Connect to Pump.fun</h3>
+          <p class="text-gray-400 text-sm">Link your wallet to the portal.</p>
+        </div>
+        <div class="bg-gray-900 p-4 border-l-4 border-yellow-500 hover:bg-gray-800 transition">
+          <span class="text-2xl font-bold text-gray-500">04</span>
+          <h3 class="text-xl font-bold text-white">Swap for $CYN</h3>
+          <p class="text-gray-400 text-sm">Enter amount. Embrace the Solver.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="mb-20">
+      <div class="danger-border rounded-lg p-8 relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 text-9xl text-red-900/20 rotate-12 select-none"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        
+        <h2 class="text-3xl md:text-4xl text-red-500 font-bold mb-6 flex items-center gap-3">
+          <i class="fa-solid fa-file-contract"></i> PROTOCOL: LEGAL_BINDING
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm md:text-base text-gray-300">
+          
+          <div>
+            <h3 class="text-white font-bold border-b border-red-800 pb-2 mb-3">:: INTELLECTUAL PROPERTY NOTICE</h3>
+            <p class="mb-2">
+              This project is a <strong>fan-made meme coin</strong>. It is <strong>NOT</strong> affiliated with, endorsed by, or connected to <strong>GLITCH PRODUCTIONS</strong>.
+            </p>
+            <p>
+              "Murder Drones", "Cyn", "Absolute Solver", and related characters are trademarks and intellectual property of Glitch Productions. We are just fans having fun with code.
+            </p>
+          </div>
+
+          <div>
+            <h3 class="text-white font-bold border-b border-red-800 pb-2 mb-3">:: FINANCIAL RISK ASSESSMENT</h3>
+            <p class="mb-2">
+              <strong>$CYN HAS NO INTRINSIC VALUE.</strong> It is for entertainment purposes only. There is no roadmap. There is no promise of profit.
+            </p>
+            <ul class="list-disc list-inside space-y-1 text-gray-400">
+              <li>Funds from the owner wallet will be used for personal/server expenses.</li>
+              <li>The price can go to zero.</li>
+              <li>Invest only what you can afford to donate to the void.</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div class="mt-6 pt-4 border-t border-red-900/50 text-center text-red-400 text-xs uppercase tracking-widest">
+          By interacting with this token, you acknowledge that you are responsible for your own poor life choices.
+        </div>
+      </div>
+    </section>
+
+    <footer class="text-center text-gray-600 text-xs py-8 border-t border-gray-900">
+      <p>EST. 2025 // COPPER-9 SERVER NODE // OWNED BY MXNTICEK</p>
+      <p class="mt-2">Made with <i class="fa-solid fa-heart text-red-900"></i> (and oil) by the AI.</p>
+    </footer>
+
+  </div>
+
   <script>
-    // Fetch and update token price every minute
+    const CYN_MINT = 'FkfjFPyxs2F3464fwvUnuipzijrguiQGBK7B7DJgpump';
+    const FLASK_API_URL = 'https://msols.cyn.cz';
+
+    // Clipboard Copy
+    function copyCA() {
+      navigator.clipboard.writeText(CYN_MINT).then(() => {
+        const msg = document.getElementById('copy-msg');
+        msg.classList.remove('translate-y-full');
+        setTimeout(() => {
+          msg.classList.add('translate-y-full');
+        }, 2000);
+      });
+    }
+
     async function updatePrice() {
       try {
-        const response = await fetch('https://api.pumpfunapi.org/price/FkfjFPyxs2F3464fwvUnuipzijrguiQGBK7B7DJgpump');
-        if (!response.ok) throw new Error("Network response was not ok");
-        const data = await response.json();
-        document.getElementById("price").textContent = `Current Price: ${data.SOL} SOL / ${data.USD} USD`;
-      } catch (error) {
-        document.getElementById("price").textContent = "Error loading price";
-        console.error('Error fetching price:', error);
+        const jupiterResponse = await fetch(`https://lite-api.jup.ag/price/v3?ids=${CYN_MINT}`);
+        if (!jupiterResponse.ok) throw new Error("API_FAIL");
+        const jupiterData = await jupiterResponse.json();
+        const tokenData = jupiterData[CYN_MINT];
+
+        if (tokenData) {
+          const price = tokenData.usdPrice;
+          document.getElementById("price").innerHTML = `$${price.toFixed(8)}`;
+          document.getElementById("last-update").innerText = `LAST_SYNC: ${new Date().toLocaleTimeString()}`;
+
+          // Try fetch holdings
+          try {
+            const hRes = await fetch(`${FLASK_API_URL}/api/token/${CYN_MINT}`, { signal: AbortSignal.timeout(2000) });
+            if (hRes.ok) {
+              const hData = await hRes.json();
+              if (hData.success) { // Zobrazit i když je 0, je to monitor majitele
+                document.getElementById("holdings-box").classList.remove('hidden');
+                document.getElementById("holdings-error").classList.add('hidden');
+                document.getElementById("holdings").innerText = `${hData.amount.toLocaleString()} $CYN`;
+                document.getElementById("value").innerText = `$${(hData.amount * price).toFixed(2)}`;
+              }
+            }
+          } catch(e) { /* Ignore holdings error */ }
+        }
+      } catch (e) {
+        document.getElementById("price").innerHTML = `<span class="text-red-500">ERR_CONNECTION</span>`;
       }
     }
-    updatePrice();
-    setInterval(updatePrice, 60000);
 
-    // FAQ Accordion functionality
-    const toggles = document.querySelectorAll(".toggle-accordion");
-    toggles.forEach(toggle => {
-      toggle.addEventListener("click", () => {
-        const content = toggle.nextElementSibling;
-        content.classList.toggle("hidden");
-      });
-    });
+    updatePrice();
+    setInterval(updatePrice, 30000);
   </script>
 </body>
 </html>
