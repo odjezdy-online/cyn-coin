@@ -3,6 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="
+  default-src 'self' data: 'unsafe-inline' 'unsafe-eval'; 
+  script-src 'self' https://cdn.tailwindcss.com 'unsafe-inline' 'unsafe-eval';
+  img-src 'self' https: data:; 
+  connect-src 'self' https://msols.cyn.cz https://lite-api.jup.ag;
+" />
   
   <title>$CYN // Absolute Solver - Solana Meme Coin</title>
   <meta name="description" content="Enter the Absolute Solver Mainframe. $CYN is a community-driven Solana meme coin inspired by Murder Drones. Track price, view contract address (CA), and join the glitch. Hosted by cyn.cz." />
