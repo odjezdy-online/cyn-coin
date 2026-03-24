@@ -10,7 +10,7 @@
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
     font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
     img-src 'self' https: data:;
-    connect-src 'self' https://msols.cyn.cz https://lite-api.jup.ag;
+    connect-src 'self' https://msols.cyn.cz https://frontend-api-v3.pump.fun;
     frame-src 'self' https://acceptable.a-ads.com;
   " />
 
@@ -387,51 +387,64 @@
       });
     });
 
-    async function updatePrice() {
-      // 1. Fetch Price from Jupiter
+    async function updateData() {
+      let currentPrice = 0;
+
+      // 1. Fetch Price directly from Pump.fun internal API (v3)
       try {
-        const jupiterResponse = await fetch(`https://lite-api.jup.ag/price/v3?ids=${CYN_MINT}`);
-        if (!jupiterResponse.ok) throw new Error(`Jupiter API returned ${jupiterResponse.status}`);
+        const pumpResponse = await fetch(`https://frontend-api-v3.pump.fun/coins/${CYN_MINT}`);
         
-        const jupiterData = await jupiterResponse.json();
-        const tokenData = jupiterData[CYN_MINT];
-
-        if (tokenData) {
-          const price = tokenData.usdPrice;
-          document.getElementById("price").innerHTML = `$${price.toFixed(8)}`;
-          document.getElementById("last-update").innerText = `LAST_SYNC: ${new Date().toLocaleTimeString()}`;
-
-          // 2. Fetch Holdings from your Flask API
-          try {
-            const hRes = await fetch(`${FLASK_API_URL}/api/token/${CYN_MINT}`, { 
-              signal: AbortSignal.timeout(5000) 
-            });
-            
-            if (hRes.ok) {
-              const hData = await hRes.json();
-              if (hData.success) {
-                document.getElementById("holdings-box").classList.remove('hidden');
-                document.getElementById("holdings-error").classList.add('hidden');
-                document.getElementById("holdings").innerText = `${hData.amount.toLocaleString()} $CYN`;
-                document.getElementById("value").innerText = `$${(hData.amount * price).toFixed(2)}`;
-              }
-            } else {
-              console.error("Flask API responded with status:", hRes.status);
-              document.getElementById("holdings-status").innerText = `> API Error: ${hRes.status}`;
-            }
-          } catch(e) { 
-            console.error("Flask API Fetch Failed. Possible CORS or CSP issue:", e);
-            document.getElementById("holdings-status").innerText = `> Connection Failed. Check DevTools Console.`;
+        if (pumpResponse.ok) {
+          const pumpData = await pumpResponse.json();
+          // Pump.fun tokens always have a fixed supply of exactly 1,000,000,000
+          if (pumpData.usd_market_cap) {
+            currentPrice = pumpData.usd_market_cap / 1000000000;
+            document.getElementById("price").innerHTML = `$${currentPrice.toFixed(8)}`;
+          } else {
+            document.getElementById("price").innerHTML = `<span class="text-yellow-600">DATA_UNAVAILABLE</span>`;
           }
+        } else {
+          document.getElementById("price").innerHTML = `<span class="text-yellow-600">NOT FOUND ON PUMP</span>`;
         }
       } catch (e) {
-        console.error("Jupiter API Fetch Failed:", e);
+        console.error("Pump.fun API Fetch Failed:", e);
         document.getElementById("price").innerHTML = `<span class="text-red-500">ERR_CONNECTION</span>`;
+      }
+      
+      document.getElementById("last-update").innerText = `LAST_SYNC: ${new Date().toLocaleTimeString()}`;
+
+      // 2. Fetch Holdings from Flask API (Independent of price success)
+      try {
+        const hRes = await fetch(`${FLASK_API_URL}/api/token/${CYN_MINT}`, { 
+          signal: AbortSignal.timeout(5000) 
+        });
+        
+        if (hRes.ok) {
+          const hData = await hRes.json();
+          if (hData.success) {
+            document.getElementById("holdings-box").classList.remove('hidden');
+            document.getElementById("holdings-error").classList.add('hidden');
+            document.getElementById("holdings").innerText = `${hData.amount.toLocaleString()} $CYN`;
+            
+            // Calculate value if price is known, otherwise show placeholder
+            if (currentPrice > 0) {
+                document.getElementById("value").innerText = `$${(hData.amount * currentPrice).toFixed(2)}`;
+            } else {
+                document.getElementById("value").innerText = `$??? (Waiting for Market Data)`;
+            }
+          }
+        } else {
+          console.error("Flask API responded with status:", hRes.status);
+          document.getElementById("holdings-status").innerText = `> API Error: ${hRes.status}`;
+        }
+      } catch(e) { 
+        console.error("Flask API Fetch Failed. Possible CORS or CSP issue:", e);
+        document.getElementById("holdings-status").innerText = `> Connection Failed. Check DevTools Console.`;
       }
     }
 
-    updatePrice();
-    setInterval(updatePrice, 30000);
+    updateData();
+    setInterval(updateData, 30000);
   </script>
 </body>
 </html>
