@@ -10,7 +10,7 @@
     style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com;
     font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
     img-src 'self' https: data:;
-    connect-src 'self' https://msols.cyn.cz https://corsproxy.io;
+    connect-src 'self' https://msols.cyn.cz;
     frame-src 'self' https://acceptable.a-ads.com;
   " />
 
@@ -390,10 +390,9 @@
     async function updateData() {
       let currentPrice = 0;
 
-      // 1. Fetch Price from Pump.fun via CORS Proxy
+      // 1. Fetch Price from tveho Flask API (ktere slouzi jako proxy)
       try {
-        // Používáme corsproxy.io pro obejití CORS restrikcí Pump.fun
-        const pumpResponse = await fetch(`https://corsproxy.io/?https://frontend-api-v3.pump.fun/coins/${CYN_MINT}`);
+        const pumpResponse = await fetch(`${FLASK_API_URL}/api/pump/${CYN_MINT}`);
         
         if (pumpResponse.ok) {
           const pumpData = await pumpResponse.json();
@@ -407,7 +406,7 @@
           document.getElementById("price").innerHTML = `<span class="text-yellow-600">NOT FOUND ON PUMP</span>`;
         }
       } catch (e) {
-        console.error("Pump.fun API Fetch Failed:", e);
+        console.error("Custom Proxy API Fetch Failed:", e);
         document.getElementById("price").innerHTML = `<span class="text-red-500">ERR_CONNECTION</span>`;
       }
       
